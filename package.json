@@ -1,0 +1,19 @@
+{
+  "name": "paul.wiesinga.at",
+  "version": "1.0.0",
+  "description": "Persönliche digitale Visitenkarte und One-Pager Portfolio für paul.wiesinga.at",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . -l 3000",
+    "deploy": "npx wrangler pages deploy . --project-name=paul-wiesinga-card"
+  },
+  "keywords": [
+    "portfolio",
+    "visitenkarte",
+    "cloudflare-pages",
+    "vcard",
+    "one-pager"
+  ],
+  "author": "Paul Wiesinger",
+  "license": "MIT"
+}
