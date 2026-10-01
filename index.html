@@ -37,12 +37,6 @@
       </div>
 
       <div class="header-actions">
-        <div class="status-indicator" title="Status: Verfügbar für Projekte">
-          <span class="status-ping"></span>
-          <span class="status-dot"></span>
-          <span class="status-label">Verfügbar</span>
-        </div>
-
         <button id="qrBtn" class="action-icon-btn" title="QR-Code für Smartphone" aria-label="QR-Code anzeigen">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7"></rect>
@@ -76,9 +70,8 @@
 
       <!-- Profile Header -->
       <section class="card-intro">
-        <div class="avatar-wrapper">
+        <div class="avatar-wrapper" title="Profilbild">
           <img src="assets/avatar.svg" id="profileImg" alt="Paul Wiesinger" class="avatar-img" onerror="this.onerror=null; this.src='assets/avatar.svg';">
-          <span class="avatar-status-badge" title="Aktiv"></span>
         </div>
 
         <div class="intro-details">
@@ -135,10 +128,10 @@
 
       <!-- Segmented Navigation: 3 Schlanke Bereiche -->
       <nav class="section-tabs" aria-label="Kategorien">
-        <button class="nav-pill active" data-tab="tab-skills">
+        <button class="nav-pill" data-tab="tab-skills">
           <span>⚡</span> Tech-Stack
         </button>
-        <button class="nav-pill" data-tab="tab-projects">
+        <button class="nav-pill active" data-tab="tab-projects">
           <span>🚀</span> Projekte
         </button>
         <button class="nav-pill" data-tab="tab-about">
@@ -150,7 +143,7 @@
       <div class="tab-panels">
 
         <!-- 1. TECH-STACK & SKILLS -->
-        <section id="tab-skills" class="tab-card active">
+        <section id="tab-skills" class="tab-card">
           <div class="skills-clean-grid">
             <div class="skill-category">
               <span class="cat-label">Backend</span>
@@ -186,8 +179,8 @@
           </div>
         </section>
 
-        <!-- 2. PROJEKTE -->
-        <section id="tab-projects" class="tab-card">
+        <!-- 2. PROJEKTE (Standardmäßig aktiv) -->
+        <section id="tab-projects" class="tab-card active">
           <div class="project-items">
             <a href="https://tourli.at" target="_blank" rel="noopener noreferrer" class="compact-project">
               <div class="project-top">

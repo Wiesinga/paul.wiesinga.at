@@ -179,14 +179,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2200);
   }
 
-  // 8. Custom Avatar Detection
+  // 8. Custom Avatar Detection (supports any common filename)
   const profileImg = document.getElementById('profileImg');
   if (profileImg) {
-    const testImg = new Image();
-    testImg.src = 'assets/avatar.jpg';
-    testImg.onload = () => {
-      profileImg.src = 'assets/avatar.jpg';
-    };
+    const candidates = [
+      'assets/avatar.jpg',
+      'assets/avatar.png',
+      'assets/avatar.jpeg',
+      'assets/profile.jpg',
+      'assets/profile.png',
+      'assets/profil.jpg',
+      'assets/paul.jpg',
+      'assets/paul.png'
+    ];
+
+    function checkImage(index) {
+      if (index >= candidates.length) return;
+      const test = new Image();
+      test.src = candidates[index];
+      test.onload = () => {
+        profileImg.src = candidates[index];
+      };
+      test.onerror = () => {
+        checkImage(index + 1);
+      };
+    }
+
+    checkImage(0);
   }
 
   // =========================================================================
