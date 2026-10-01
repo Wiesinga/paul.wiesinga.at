@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Paul Wiesinger – Software Developer & IT-Spezialist. Persönliche Visitenkarte und Portfolio.">
   <meta name="author" content="Paul Wiesinger">
-  <meta name="theme-color" content="#0b0d11">
+  <meta name="theme-color" content="#090c10">
 
-  <!-- Open Graph / Meta -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://paul.wiesinga.at/">
   <meta property="og:title" content="Paul Wiesinger | Visitenkarte">
-  <meta property="og:description" content="Software Developer & IT-Spezialist. Besuche meine persönliche Visitenkarte & Portfolio.">
+  <meta property="og:description" content="Software Developer – Persönliche digitale Visitenkarte.">
   <meta property="og:image" content="https://paul.wiesinga.at/assets/avatar.svg">
 
   <title>Paul Wiesinger | Visitenkarte</title>
@@ -20,27 +20,31 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Ambient background glow reacting to pointer -->
-  <div class="ambient-glow" id="ambientGlow"></div>
+  <!-- Interactive background canvas (reacts smoothly to mouse around the card) -->
+  <canvas id="bgCanvas" class="bg-canvas"></canvas>
 
-  <!-- Main container -->
-  <div class="page-wrapper">
+  <!-- Ambient light spotlight following pointer -->
+  <div class="cursor-glow" id="cursorGlow"></div>
 
-    <!-- Top Navigation Bar -->
-    <header class="top-nav">
-      <div class="brand-badge">
-        <span class="brand-logo">PW</span>
-        <span class="brand-domain">paul.wiesinga.at</span>
+  <!-- Main Container -->
+  <div class="page-container">
+
+    <!-- Top Floating Header -->
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-monogram">PW</span>
+        <span class="brand-name">paul.wiesinga.at</span>
       </div>
 
-      <div class="nav-controls">
-        <div class="status-pill" title="Aktueller Status">
+      <div class="header-actions">
+        <div class="status-indicator" title="Status: Verfügbar für Projekte">
+          <span class="status-ping"></span>
           <span class="status-dot"></span>
-          <span class="status-text">Verfügbar</span>
+          <span class="status-label">Verfügbar</span>
         </div>
 
-        <button id="qrBtn" class="icon-btn" title="QR-Code anzeigen (Taste: Q)" aria-label="QR-Code anzeigen">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="qrBtn" class="action-icon-btn" title="QR-Code für Smartphone" aria-label="QR-Code anzeigen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7"></rect>
             <rect x="14" y="3" width="7" height="7"></rect>
             <rect x="14" y="14" width="7" height="7"></rect>
@@ -48,8 +52,8 @@
           </svg>
         </button>
 
-        <button id="themeToggle" class="icon-btn" title="Theme wechseln (Taste: T)" aria-label="Theme wechseln">
-          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button id="themeToggle" class="action-icon-btn" title="Design wechseln (Dunkel/Hell)" aria-label="Design wechseln">
+          <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -60,338 +64,226 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
-          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
       </div>
     </header>
 
-    <!-- Main Hero Digital Card with 3D Tilt and Spotlight -->
-    <main class="card-container">
-      <div class="tilt-card-wrapper" id="tiltWrapper">
-        <div class="tilt-card" id="tiltCard">
-          <div class="card-spotlight" id="cardSpotlight"></div>
+    <!-- Static Business Card (Clean, Sharp, Stable) -->
+    <main class="static-card">
 
-          <!-- Card Header Section -->
-          <div class="card-hero">
-            <div class="avatar-container">
-              <!-- Profilbild: falls avatar.jpg existiert, wird dieses geladen, sonst avatar.svg -->
-              <img src="assets/avatar.svg" id="profileImg" alt="Paul Wiesinger" class="profile-avatar" onerror="this.onerror=null; this.src='assets/avatar.svg';">
-              <span class="avatar-badge" title="Online / Aktiv"></span>
-            </div>
+      <!-- Profile Header -->
+      <section class="card-intro">
+        <div class="avatar-wrapper">
+          <img src="assets/avatar.svg" id="profileImg" alt="Paul Wiesinger" class="avatar-img" onerror="this.onerror=null; this.src='assets/avatar.svg';">
+          <span class="avatar-status-badge" title="Aktiv"></span>
+        </div>
 
-            <div class="profile-info">
-              <div class="name-row">
-                <h1 class="profile-name">Paul Wiesinger</h1>
-                <span class="verified-badge" title="Verifizierte Identität">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
-                </span>
-              </div>
-              <p class="profile-tagline">Software Developer &amp; IT-Spezialist</p>
-              <div class="location-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                <span>Oberösterreich, Österreich</span>
-                <span class="dot-separator">•</span>
-                <span class="subdomain-text">paul.wiesinga.at</span>
-              </div>
-            </div>
+        <div class="intro-details">
+          <div class="name-badge-row">
+            <h1 class="person-name">Paul Wiesinger</h1>
           </div>
-
-          <!-- Quick Bio Quote -->
-          <div class="card-bio">
-            <p>Leidenschaftlicher Entwickler mit Fokus auf moderne Webanwendungen, robuste C# .NET Backends und saubere Systemarchitektur.</p>
-          </div>
-
-          <!-- Action Buttons Bar -->
-          <div class="card-actions">
-            <button id="downloadVCard" class="btn btn-primary" title="In Smartphone-Kontakte speichern (Taste: V)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
+          <p class="person-role">Software Developer</p>
+          <div class="person-meta">
+            <span class="meta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
               </svg>
-              <span>vCard speichern</span>
-            </button>
-
-            <button id="copyEmailBtn" class="btn btn-secondary" title="E-Mail kopieren (Taste: C)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              <span id="copyBtnText">E-Mail kopieren</span>
-            </button>
-
-            <a href="mailto:paul@wiesinga.at" class="btn btn-secondary icon-only" title="Direkt E-Mail senden" aria-label="E-Mail senden">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-              </svg>
-            </a>
+              Oberösterreich, AT
+            </span>
+            <span class="meta-dot">•</span>
+            <span class="meta-tag">C# / .NET &amp; Web</span>
           </div>
+        </div>
+      </section>
 
-          <!-- Interactive Tab Navigation -->
-          <nav class="tabs-nav" aria-label="Abschnitte">
-            <button class="tab-btn active" data-tab="tab-about">
-              <span class="tab-icon">👤</span> Über mich
-            </button>
-            <button class="tab-btn" data-tab="tab-education">
-              <span class="tab-icon">🎓</span> Ausbildung
-            </button>
-            <button class="tab-btn" data-tab="tab-projects">
-              <span class="tab-icon">🚀</span> Projekte
-            </button>
-            <button class="tab-btn" data-tab="tab-skills">
-              <span class="tab-icon">⚡</span> Skills
-            </button>
-          </nav>
+      <!-- Short Punchy Bio Statement -->
+      <p class="lead-bio">
+        Fokus auf moderne Softwarearchitekturen, performante .NET Backends und saubere, intuitive Weboberflächen.
+      </p>
 
-          <!-- Tab Content Panels -->
-          <div class="tabs-content">
+      <!-- Main Action Buttons -->
+      <div class="quick-contacts">
+        <button id="downloadVCard" class="btn-primary" title="In Smartphone-Kontakte importieren">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span>vCard speichern</span>
+        </button>
 
-            <!-- TAB 1: ÜBER MICH -->
-            <section id="tab-about" class="tab-panel active">
-              <div class="bento-grid">
-                <div class="bento-item">
-                  <div class="bento-header">
-                    <span class="bento-badge">💡 Philosophie</span>
-                  </div>
-                  <h3>Sauberer Code &amp; Performance</h3>
-                  <p>Fokus auf wartbare Architekturen, moderne Best Practices und performante Schnittstellen.</p>
-                </div>
+        <button id="copyEmailBtn" class="btn-email-pill" title="E-Mail-Adresse kopieren">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span id="copyBtnText">paul@wiesinga.at</span>
+        </button>
 
-                <div class="bento-item">
-                  <div class="bento-header">
-                    <span class="bento-badge">⚙️ Kernkompetenz</span>
-                  </div>
-                  <h3>Full-Stack &amp; Services</h3>
-                  <p>Erfahrung im Entwurf skalierbarer Services mit C#, .NET, Docker und modernen Web-Frameworks.</p>
-                </div>
+        <div class="social-links-row">
+          <a href="https://github.com/Wiesinga" target="_blank" rel="noopener noreferrer" class="social-icon-btn" title="GitHub Profil" aria-label="GitHub">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+          </a>
 
-                <div class="bento-item full-width">
-                  <div class="bento-header">
-                    <span class="bento-badge">🌐 Vernetzung</span>
-                  </div>
-                  <div class="social-links-grid">
-                    <a href="https://github.com/paulw" target="_blank" rel="noopener noreferrer" class="social-chip">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                      </svg>
-                      <span>GitHub</span>
-                    </a>
-                    <a href="https://linkedin.com/in/paulwiesinger" target="_blank" rel="noopener noreferrer" class="social-chip">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                      </svg>
-                      <span>LinkedIn</span>
-                    </a>
-                    <a href="mailto:paul@wiesinga.at" class="social-chip">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                      </svg>
-                      <span>paul@wiesinga.at</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- TAB 2: AUSBILDUNG & WERDEGANG -->
-            <section id="tab-education" class="tab-panel">
-              <div class="timeline">
-                <div class="timeline-item">
-                  <div class="timeline-marker"></div>
-                  <div class="timeline-content">
-                    <span class="timeline-period">2023 – Heute</span>
-                    <h3 class="timeline-title">Softwareentwicklung &amp; Systemarchitektur</h3>
-                    <p class="timeline-subtitle">Projekte, Konzeption &amp; Realisierung</p>
-                    <p class="timeline-desc">Konzeption moderner Softwarelösungen, Datenbankdesign, REST-APIs und interaktive Web- &amp; Mobile-Plattformen.</p>
-                  </div>
-                </div>
-
-                <div class="timeline-item">
-                  <div class="timeline-marker"></div>
-                  <div class="timeline-content">
-                    <span class="timeline-period">Ausbildung / Schule</span>
-                    <h3 class="timeline-title">Höhere Technische Lehranstalt (HTL)</h3>
-                    <p class="timeline-subtitle">Schwerpunkt Informatik &amp; Software Engineering</p>
-                    <p class="timeline-desc">Fundierte Ausbildung in Softwareentwicklung (C#, OOP, Web), Datenbanken (SQL, Relationale Modelle), Netzwerktechnik und Projektmanagement.</p>
-                  </div>
-                </div>
-
-                <div class="timeline-item">
-                  <div class="timeline-marker"></div>
-                  <div class="timeline-content">
-                    <span class="timeline-period">Zertifikate &amp; Schwerpunkte</span>
-                    <h3 class="timeline-title">Cloud &amp; Moderne Architekturen</h3>
-                    <p class="timeline-subtitle">Continuous Learning</p>
-                    <p class="timeline-desc">Containerisierung mit Docker, API Security, Cloudflare Edge Deployment und moderne Frameworks.</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- TAB 3: PROJEKTE -->
-            <section id="tab-projects" class="tab-panel">
-              <div class="projects-list">
-                <!-- Projekt 1: Tourli MultimediaGuide -->
-                <article class="project-card">
-                  <div class="project-header">
-                    <div>
-                      <span class="project-category">Featured Project</span>
-                      <h3 class="project-title">Tourli – MultiMediaGuide</h3>
-                    </div>
-                    <span class="project-status">In Entwicklung</span>
-                  </div>
-                  <p class="project-description">
-                    Interaktive Multimedia-Guide-Plattform mit .NET Backend, Clean Architecture, Entity Framework Core, PostgreSQL und Docker-Containerisierung.
-                  </p>
-                  <div class="project-tech-tags">
-                    <span class="tag">C#</span>
-                    <span class="tag">.NET 9</span>
-                    <span class="tag">PostgreSQL</span>
-                    <span class="tag">Docker</span>
-                    <span class="tag">Clean Architecture</span>
-                  </div>
-                </article>
-
-                <!-- Projekt 2: Personal Digital Card -->
-                <article class="project-card">
-                  <div class="project-header">
-                    <div>
-                      <span class="project-category">Web &amp; Identity</span>
-                      <h3 class="project-title">paul.wiesinga.at</h3>
-                    </div>
-                    <span class="project-status live">Live</span>
-                  </div>
-                  <p class="project-description">
-                    Minimalistische, responsive One-Pager Visitenkarte mit 3D-Tilt-Effekt, dynamischem vCard-Export und Cloudflare Pages Edge Deployment.
-                  </p>
-                  <div class="project-tech-tags">
-                    <span class="tag">Cloudflare Pages</span>
-                    <span class="tag">HTML5 / Modern CSS</span>
-                    <span class="tag">Vanilla JS</span>
-                    <span class="tag">Zero Dependencies</span>
-                  </div>
-                </article>
-
-                <!-- Projekt 3: API & Integrations -->
-                <article class="project-card">
-                  <div class="project-header">
-                    <div>
-                      <span class="project-category">Backend &amp; Middleware</span>
-                      <h3 class="project-title">System- &amp; API-Middleware</h3>
-                    </div>
-                    <span class="project-status">Produktiv</span>
-                  </div>
-                  <p class="project-description">
-                    Zuverlässige Middleware zur Synchronisation und Anbindung von Drittanbietersystemen und automatisierten Datenflüssen.
-                  </p>
-                  <div class="project-tech-tags">
-                    <span class="tag">REST API</span>
-                    <span class="tag">C#</span>
-                    <span class="tag">Data Pipelines</span>
-                  </div>
-                </article>
-              </div>
-            </section>
-
-            <!-- TAB 4: SKILLS & TECH-STACK -->
-            <section id="tab-skills" class="tab-panel">
-              <div class="skills-wrapper">
-                <div class="skill-group">
-                  <h4>Backend &amp; Programmiersprachen</h4>
-                  <div class="skill-chips">
-                    <span class="skill-chip highlight">C#</span>
-                    <span class="skill-chip highlight">.NET / ASP.NET Core</span>
-                    <span class="skill-chip">Entity Framework Core</span>
-                    <span class="skill-chip">RESTful APIs</span>
-                    <span class="skill-chip">SQL</span>
-                  </div>
-                </div>
-
-                <div class="skill-group">
-                  <h4>Frontend &amp; Web</h4>
-                  <div class="skill-chips">
-                    <span class="skill-chip highlight">HTML5 &amp; CSS3</span>
-                    <span class="skill-chip">JavaScript / TypeScript</span>
-                    <span class="skill-chip">Responsive Web Design</span>
-                    <span class="skill-chip">UI / UX Microinteractions</span>
-                  </div>
-                </div>
-
-                <div class="skill-group">
-                  <h4>Infrastruktur, Tools &amp; Datenbanken</h4>
-                  <div class="skill-chips">
-                    <span class="skill-chip highlight">Docker &amp; Compose</span>
-                    <span class="skill-chip">PostgreSQL</span>
-                    <span class="skill-chip">Cloudflare (Pages, DNS)</span>
-                    <span class="skill-chip">Git &amp; GitHub</span>
-                    <span class="skill-chip">Visual Studio / VS Code</span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-          </div>
-
-          <!-- Card Footer with Keyboard Shortcuts Hint -->
-          <footer class="card-footer">
-            <div class="footer-hint">
-              <span class="keyboard-badge">T</span> Theme
-              <span class="keyboard-badge">C</span> E-Mail
-              <span class="keyboard-badge">V</span> vCard
-              <span class="keyboard-badge">Q</span> QR-Code
-            </div>
-            <div class="footer-copy">
-              &copy; <span id="currentYear"></span> Paul Wiesinger • Hosted on Cloudflare
-            </div>
-          </footer>
-
+          <a href="https://linkedin.com/in/paulwiesinger" target="_blank" rel="noopener noreferrer" class="social-icon-btn" title="LinkedIn Profil" aria-label="LinkedIn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+            </svg>
+          </a>
         </div>
       </div>
+
+      <!-- Segmented Navigation: 3 Schlanke Bereiche -->
+      <nav class="section-tabs" aria-label="Kategorien">
+        <button class="nav-pill active" data-tab="tab-skills">
+          <span>⚡</span> Tech-Stack
+        </button>
+        <button class="nav-pill" data-tab="tab-projects">
+          <span>🚀</span> Projekte
+        </button>
+        <button class="nav-pill" data-tab="tab-about">
+          <span>🎓</span> Werdegang
+        </button>
+      </nav>
+
+      <!-- Tab Content Panels (Simple, übersichtlich, ohne Textflut) -->
+      <div class="tab-panels">
+
+        <!-- 1. TECH-STACK & SKILLS -->
+        <section id="tab-skills" class="tab-card active">
+          <div class="skills-clean-grid">
+            <div class="skill-category">
+              <span class="cat-label">Backend</span>
+              <div class="chips-row">
+                <span class="chip chip-main">C#</span>
+                <span class="chip chip-main">.NET 9</span>
+                <span class="chip">ASP.NET Core</span>
+                <span class="chip">EF Core</span>
+                <span class="chip">REST APIs</span>
+              </div>
+            </div>
+
+            <div class="skill-category">
+              <span class="cat-label">Frontend &amp; Web</span>
+              <div class="chips-row">
+                <span class="chip">HTML5 / Modern CSS</span>
+                <span class="chip">TypeScript / JS</span>
+                <span class="chip">Responsive UI</span>
+              </div>
+            </div>
+
+            <div class="skill-category">
+              <span class="cat-label">DevOps &amp; Daten</span>
+              <div class="chips-row">
+                <span class="chip">Docker &amp; Compose</span>
+                <span class="chip">PostgreSQL / SQL</span>
+                <span class="chip">Cloudflare</span>
+                <span class="chip">Git</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. PROJEKTE -->
+        <section id="tab-projects" class="tab-card">
+          <div class="project-items">
+            <article class="compact-project">
+              <div class="project-top">
+                <h4>Tourli – MultiMediaGuide</h4>
+                <span class="badge-status">In Entwicklung</span>
+              </div>
+              <p>Plattform für interaktive Guides mit modernem C# .NET Backend, Clean Architecture, PostgreSQL &amp; Docker.</p>
+              <div class="project-mini-tags">
+                <span>.NET 9</span>
+                <span>C#</span>
+                <span>Docker</span>
+                <span>PostgreSQL</span>
+              </div>
+            </article>
+
+            <article class="compact-project">
+              <div class="project-top">
+                <h4>paul.wiesinga.at</h4>
+                <span class="badge-status live">Live</span>
+              </div>
+              <p>Minimalistische digitale Visitenkarte auf Cloudflare mit vCard-Export und flüssigen Interaktionen.</p>
+              <div class="project-mini-tags">
+                <span>Cloudflare</span>
+                <span>HTML / CSS</span>
+                <span>Vanilla JS</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 3. WERDEGANG & AUSBILDUNG -->
+        <section id="tab-about" class="tab-card">
+          <div class="simple-timeline">
+            <div class="timeline-row">
+              <span class="time-year">Aktuell</span>
+              <div class="time-info">
+                <strong>Softwareentwicklung</strong>
+                <p>Konzeption und Umsetzung moderner Anwendungen, Schnittstellen und Weblösungen.</p>
+              </div>
+            </div>
+
+            <div class="timeline-row">
+              <span class="time-year">Ausbildung</span>
+              <div class="time-info">
+                <strong>Höhere Technische Lehranstalt (HTL)</strong>
+                <p>Schwerpunkt Informatik &amp; Software Engineering (Softwarearchitektur, Datenbanken &amp; Systeme).</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Footer -->
+      <footer class="card-bottom">
+        <span class="footer-note">&copy; <span id="currentYear"></span> Paul Wiesinger</span>
+        <span class="footer-dot">•</span>
+        <span class="footer-host">paul.wiesinga.at</span>
+      </footer>
+
     </main>
   </div>
 
   <!-- QR-Code Modal -->
-  <div class="modal-backdrop" id="qrModal" aria-hidden="true">
-    <div class="modal-card">
-      <button class="modal-close" id="closeQrModal" aria-label="Schließen">
+  <div class="modal-layer" id="qrModal" aria-hidden="true">
+    <div class="modal-box">
+      <button class="modal-dismiss" id="closeQrModal" aria-label="Schließen">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
 
-      <div class="modal-header">
-        <h3>Visitenkarte scannen</h3>
-        <p>Halte deine Kamera auf den QR-Code, um <strong>paul.wiesinga.at</strong> auf dem Smartphone zu öffnen.</p>
+      <h3>Visitenkarte scannen</h3>
+      <p class="modal-sub">Scanne den Code mit der Kamera, um <strong>paul.wiesinga.at</strong> auf dem Smartphone zu öffnen.</p>
+
+      <div class="qr-frame">
+        <img src="assets/qrcode.svg" alt="QR-Code" class="qr-img">
       </div>
 
-      <div class="qr-image-wrapper">
-        <img src="assets/qrcode.svg" alt="QR-Code für https://paul.wiesinga.at" class="qr-svg">
-      </div>
-
-      <div class="modal-actions">
-        <a href="https://paul.wiesinga.at" class="modal-link-btn" target="_blank" rel="noopener noreferrer">
-          paul.wiesinga.at
-        </a>
-      </div>
+      <a href="https://paul.wiesinga.at" class="qr-direct-link" target="_blank" rel="noopener noreferrer">
+        paul.wiesinga.at
+      </a>
     </div>
   </div>
 
   <!-- Toast Notification -->
-  <div class="toast" id="toastNotification" role="alert" aria-live="polite">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <div class="toast-feedback" id="toastNotification" role="alert" aria-live="polite">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20 6 9 17 4 12"></polyline>
     </svg>
-    <span id="toastMessage">In Zwischenablage kopiert!</span>
+    <span id="toastMessage">Kopiert!</span>
   </div>
 
   <script src="script.js"></script>

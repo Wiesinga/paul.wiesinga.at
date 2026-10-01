@@ -4,3 +4,5 @@ Thumbs.db
 .wrangler/
 .env*
 dist/
+.vscode/
+

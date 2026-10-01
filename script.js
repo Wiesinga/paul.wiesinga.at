@@ -1,11 +1,13 @@
 /**
- * Paul Wiesinger – Personal Digital Business Card
- * Interactions: 3D Tilt, Dynamic Spotlight, Theme Switcher,
- * Tab Switcher, vCard Export, Clipboard & QR-Modal
+ * Paul Wiesinger – Personal Digital Business Card (paul.wiesinga.at)
+ * - Rock-solid static card (zero distracting tilt)
+ * - Smooth, interactive background particle canvas & ambient cursor glow
+ * - 1-Click vCard (.vcf) download & clipboard copy
+ * - Clean tab navigation & theme persistence
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Elements
+  // --- DOM Elements ---
   const html = document.documentElement;
   const themeToggle = document.getElementById('themeToggle');
   const qrBtn = document.getElementById('qrBtn');
@@ -16,29 +18,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyBtnText = document.getElementById('copyBtnText');
   const toast = document.getElementById('toastNotification');
   const toastMessage = document.getElementById('toastMessage');
-  const tiltWrapper = document.getElementById('tiltWrapper');
-  const tiltCard = document.getElementById('tiltCard');
-  const ambientGlow = document.getElementById('ambientGlow');
-  const tabButtons = document.querySelectorAll('.tab-btn');
-  const tabPanels = document.querySelectorAll('.tab-panel');
+  const cursorGlow = document.getElementById('cursorGlow');
+  const tabButtons = document.querySelectorAll('.nav-pill');
+  const tabPanels = document.querySelectorAll('.tab-card');
   const currentYearSpan = document.getElementById('currentYear');
+  const canvas = document.getElementById('bgCanvas');
 
-  // Contact Information Constants
+  // Contact Data
   const CONTACT = {
+    name: 'Paul Wiesinger',
     firstName: 'Paul',
     lastName: 'Wiesinger',
     email: 'paul@wiesinga.at',
     website: 'https://paul.wiesinga.at',
-    title: 'Software Developer & IT-Spezialist',
+    role: 'Software Developer',
     location: 'Oberösterreich, Österreich'
   };
 
-  // 1. Set current year
+  // 1. Year
   if (currentYearSpan) {
     currentYearSpan.textContent = new Date().getFullYear();
   }
 
-  // 2. Theme Management (Dark / Light with localStorage persistence)
+  // 2. Theme Toggle (Dark / Light)
   const savedTheme = localStorage.getItem('pw_theme') ||
     (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
   setTheme(savedTheme);
@@ -48,176 +50,97 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('pw_theme', theme);
   }
 
-  function toggleTheme() {
-    const currentTheme = html.getAttribute('data-theme') || 'dark';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    showToast(`Design auf ${newTheme === 'dark' ? 'Dunkel' : 'Hell'} umgestellt`);
-  }
-
   if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
-  }
-
-  // 3. Ambient Background & 3D Tilt + Dynamic Spotlight
-  let bounds;
-
-  function updateBounds() {
-    if (tiltCard) {
-      bounds = tiltCard.getBoundingClientRect();
-    }
-  }
-
-  window.addEventListener('resize', updateBounds);
-  window.addEventListener('scroll', updateBounds);
-  updateBounds();
-
-  // Pointer movement tracking
-  window.addEventListener('pointermove', (e) => {
-    // Ambient page glow
-    const xPct = Math.round((e.clientX / window.innerWidth) * 100);
-    const yPct = Math.round((e.clientY / window.innerHeight) * 100);
-    document.documentElement.style.setProperty('--mouse-x', `${xPct}%`);
-    document.documentElement.style.setProperty('--mouse-y', `${yPct}%`);
-
-    // 3D Card tilt (only on desktop / hover devices)
-    if (window.matchMedia('(pointer: fine)').matches && tiltWrapper && tiltCard) {
-      if (!bounds) updateBounds();
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
-
-      const isInside = (
-        mouseX >= bounds.left - 40 &&
-        mouseX <= bounds.right + 40 &&
-        mouseY >= bounds.top - 40 &&
-        mouseY <= bounds.bottom + 40
-      );
-
-      if (isInside) {
-        const leftX = mouseX - bounds.x;
-        const topY = mouseY - bounds.y;
-        const center = {
-          x: leftX - bounds.width / 2,
-          y: topY - bounds.height / 2
-        };
-
-        // Smooth subtle tilt angles (max ~6 degrees for elegant feel)
-        const rotateX = -(center.y / (bounds.height / 2)) * 6;
-        const rotateY = (center.x / (bounds.width / 2)) * 6;
-
-        tiltWrapper.style.transform = `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
-
-        // Update spotlight on card
-        tiltCard.style.setProperty('--card-mouse-x', `${leftX}px`);
-        tiltCard.style.setProperty('--card-mouse-y', `${topY}px`);
-      } else {
-        tiltWrapper.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
-      }
-    }
-  });
-
-  if (tiltCard) {
-    tiltCard.addEventListener('pointerleave', () => {
-      if (tiltWrapper) {
-        tiltWrapper.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg)';
-      }
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = html.getAttribute('data-theme') || 'dark';
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(nextTheme);
+      showToast(`Design: ${nextTheme === 'dark' ? 'Dunkel' : 'Hell'}`);
     });
   }
 
-  // 4. Tab Navigation
-  tabButtons.forEach((btn, index) => {
+  // 3. Tab Navigation
+  tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      switchTab(btn);
+      const targetId = btn.getAttribute('data-tab');
+
+      tabButtons.forEach(b => b.classList.remove('active'));
+      tabPanels.forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      const targetPanel = document.getElementById(targetId);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
     });
   });
 
-  function switchTab(targetBtn) {
-    const targetId = targetBtn.getAttribute('data-tab');
-
-    tabButtons.forEach(b => b.classList.remove('active'));
-    tabPanels.forEach(p => p.classList.remove('active'));
-
-    targetBtn.classList.add('active');
-    const activePanel = document.getElementById(targetId);
-    if (activePanel) {
-      activePanel.classList.add('active');
-    }
-
-    // Refresh bounds when card content height changes
-    setTimeout(updateBounds, 100);
-  }
-
-  // 5. vCard Export (.vcf generation)
+  // 4. vCard Download (.vcf)
   if (downloadVCardBtn) {
-    downloadVCardBtn.addEventListener('click', generateAndDownloadVCard);
+    downloadVCardBtn.addEventListener('click', () => {
+      const vcard = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `N:${CONTACT.lastName};${CONTACT.firstName};;;`,
+        `FN:${CONTACT.name}`,
+        `TITLE:${CONTACT.role}`,
+        `EMAIL;TYPE=INTERNET,PREF:${CONTACT.email}`,
+        `URL;TYPE=WORK:${CONTACT.website}`,
+        `ADR;TYPE=HOME:;;;${CONTACT.location};;;`,
+        'NOTE:Digitale Visitenkarte via paul.wiesinga.at',
+        'END:VCARD'
+      ].join('\r\n');
+
+      const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${CONTACT.firstName.toLowerCase()}-${CONTACT.lastName.toLowerCase()}.vcf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('vCard heruntergeladen 📇');
+    });
   }
 
-  function generateAndDownloadVCard() {
-    const vCardData = [
-      'BEGIN:VCARD',
-      'VERSION:3.0',
-      `N:${CONTACT.lastName};${CONTACT.firstName};;;`,
-      `FN:${CONTACT.firstName} ${CONTACT.lastName}`,
-      `TITLE:${CONTACT.title}`,
-      `EMAIL;TYPE=INTERNET,PREF:${CONTACT.email}`,
-      `URL;TYPE=WORK:${CONTACT.website}`,
-      `ADR;TYPE=HOME:;;;${CONTACT.location};;;`,
-      'NOTE:Digitale Visitenkarte via paul.wiesinga.at',
-      'REV:' + new Date().toISOString(),
-      'END:VCARD'
-    ].join('\r\n');
-
-    const blob = new Blob([vCardData], { type: 'text/vcard;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `${CONTACT.firstName.toLowerCase()}-${CONTACT.lastName.toLowerCase()}.vcf`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    showToast('vCard-Kontaktdatei heruntergeladen! 📇');
-  }
-
-  // 6. Copy Email with feedback
+  // 5. Copy Email
   if (copyEmailBtn) {
-    copyEmailBtn.addEventListener('click', copyEmail);
-  }
-
-  function copyEmail() {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(CONTACT.email)
-        .then(() => triggerCopySuccess())
-        .catch(() => fallbackCopy(CONTACT.email));
-    } else {
-      fallbackCopy(CONTACT.email);
-    }
+    copyEmailBtn.addEventListener('click', () => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(CONTACT.email)
+          .then(onCopied)
+          .catch(() => fallbackCopy(CONTACT.email));
+      } else {
+        fallbackCopy(CONTACT.email);
+      }
+    });
   }
 
   function fallbackCopy(text) {
-    const tempInput = document.createElement('input');
-    tempInput.value = text;
-    document.body.appendChild(tempInput);
-    tempInput.select();
+    const input = document.createElement('input');
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
     try {
       document.execCommand('copy');
-      triggerCopySuccess();
-    } catch (err) {
-      showToast('Kopieren fehlgeschlagen.');
+      onCopied();
+    } catch (e) {
+      showToast('Kopieren nicht unterstützt');
     }
-    document.body.removeChild(tempInput);
+    document.body.removeChild(input);
   }
 
-  function triggerCopySuccess() {
+  function onCopied() {
     if (copyBtnText) copyBtnText.textContent = 'Kopiert! ✓';
-    showToast(`${CONTACT.email} in die Zwischenablage kopiert!`);
+    showToast(`${CONTACT.email} kopiert!`);
     setTimeout(() => {
-      if (copyBtnText) copyBtnText.textContent = 'E-Mail kopieren';
-    }, 2200);
+      if (copyBtnText) copyBtnText.textContent = CONTACT.email;
+    }, 2000);
   }
 
-  // 7. QR-Code Modal
+  // 6. QR Modal
   function openModal() {
     if (qrModal) {
       qrModal.classList.add('open');
@@ -234,62 +157,197 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (qrBtn) qrBtn.addEventListener('click', openModal);
   if (closeQrModal) closeQrModal.addEventListener('click', closeModal);
-
   if (qrModal) {
     qrModal.addEventListener('click', (e) => {
       if (e.target === qrModal) closeModal();
     });
   }
 
-  // 8. Toast Notification Utility
-  let toastTimer;
-  function showToast(msg) {
-    if (!toast) return;
-    if (toastMessage) toastMessage.textContent = msg;
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
 
+  // 7. Toast Feedback
+  let toastTimer;
+  function showToast(text) {
+    if (!toast) return;
+    if (toastMessage) toastMessage.textContent = text;
     toast.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toast.classList.remove('show');
-    }, 2500);
+    }, 2200);
   }
 
-  // 9. Keyboard Shortcuts for power users
-  window.addEventListener('keydown', (e) => {
-    // Ignore keystrokes if an input or editable field is active
-    if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-
-    const key = e.key.toUpperCase();
-
-    if (e.key === 'Escape') {
-      closeModal();
-    } else if (key === 'T') {
-      toggleTheme();
-    } else if (key === 'C') {
-      copyEmail();
-    } else if (key === 'V') {
-      generateAndDownloadVCard();
-    } else if (key === 'Q') {
-      if (qrModal && qrModal.classList.contains('open')) {
-        closeModal();
-      } else {
-        openModal();
-      }
-    } else if (['1', '2', '3', '4'].includes(e.key)) {
-      const idx = parseInt(e.key, 10) - 1;
-      if (tabButtons[idx]) {
-        switchTab(tabButtons[idx]);
-      }
-    }
-  });
-
-  // Check if custom avatar exists (assets/avatar.jpg or avatar.png)
-  const avatarImg = document.getElementById('profileImg');
-  if (avatarImg) {
+  // 8. Custom Avatar Detection
+  const profileImg = document.getElementById('profileImg');
+  if (profileImg) {
     const testImg = new Image();
     testImg.src = 'assets/avatar.jpg';
     testImg.onload = () => {
-      avatarImg.src = 'assets/avatar.jpg';
+      profileImg.src = 'assets/avatar.jpg';
     };
+  }
+
+  // =========================================================================
+  // 9. Interactive Background Canvas (Particles & Soft Cursor Ambient Light)
+  // =========================================================================
+  if (canvas && canvas.getContext) {
+    const ctx = canvas.getContext('2d');
+    let width = 0;
+    let height = 0;
+    let particles = [];
+    const particleCount = 42;
+    const mouse = { x: -1000, y: -1000, active: false };
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Mouse tracking for background
+    window.addEventListener('pointermove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.active = true;
+
+      // Move CSS cursor glow
+      if (cursorGlow) {
+        cursorGlow.style.left = `${e.clientX}px`;
+        cursorGlow.style.top = `${e.clientY}px`;
+      }
+    });
+
+    window.addEventListener('pointerleave', () => {
+      mouse.active = false;
+      mouse.x = -1000;
+      mouse.y = -1000;
+    });
+
+    // Particle class
+    class Particle {
+      constructor() {
+        this.reset(true);
+      }
+
+      reset(init = false) {
+        this.x = Math.random() * width;
+        this.y = init ? Math.random() * height : (Math.random() < 0.5 ? -10 : height + 10);
+        this.vx = (Math.random() - 0.5) * 0.45;
+        this.vy = (Math.random() - 0.5) * 0.45;
+        this.radius = Math.random() * 1.6 + 0.8;
+        this.baseAlpha = Math.random() * 0.35 + 0.15;
+        this.alpha = this.baseAlpha;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Bounce gently at screen edges
+        if (this.x < 0 || this.x > width) this.vx *= -1;
+        if (this.y < 0 || this.y > height) this.vy *= -1;
+
+        // Distance to mouse pointer
+        if (mouse.active) {
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const maxDist = 160;
+
+          if (dist < maxDist) {
+            // Soft illumination near cursor
+            const factor = 1 - dist / maxDist;
+            this.alpha = Math.min(0.85, this.baseAlpha + factor * 0.6);
+
+            // Subtle attraction towards or glide around mouse
+            this.x += (dx / dist) * factor * 0.4;
+            this.y += (dy / dist) * factor * 0.4;
+          } else {
+            this.alpha += (this.baseAlpha - this.alpha) * 0.05;
+          }
+        } else {
+          this.alpha += (this.baseAlpha - this.alpha) * 0.05;
+        }
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(148, 163, 184, ${this.alpha})`;
+        ctx.fill();
+      }
+    }
+
+    // Initialize particles
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+
+    // Animation Loop
+    let animationFrameId;
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Connect particles to mouse with faint elegant lines if nearby
+      if (mouse.active) {
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const dx = mouse.x - p.x;
+          const dy = mouse.y - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 130) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            const lineAlpha = (1 - dist / 130) * 0.35;
+            ctx.strokeStyle = `rgba(99, 102, 241, ${lineAlpha})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+
+          // Also connect neighbouring particles if close to each other
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const pDx = p.x - p2.x;
+            const pDy = p.y - p2.y;
+            const pDist = Math.sqrt(pDx * pDx + pDy * pDy);
+
+            if (pDist < 85) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              const linkAlpha = (1 - pDist / 85) * 0.15;
+              ctx.strokeStyle = `rgba(148, 163, 184, ${linkAlpha})`;
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // Update and draw each particle
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // Pause when tab is not visible to conserve battery
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animationFrameId);
+      } else {
+        animate();
+      }
+    });
   }
 });
