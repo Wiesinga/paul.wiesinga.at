@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lastName: 'Wiesinger',
     email: 'paul@wiesinga.at',
     website: 'https://paul.wiesinga.at',
-    role: 'Software Developer',
+    role: 'Software Developer | Co-Founder Tourli',
     location: 'Oberösterreich, Österreich'
   };
 
